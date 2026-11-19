@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RupeeTrack — Personal Cashflow Ledger | CodSoft Task 3</title>
+  <meta name="description" content="Hand-crafted modern fintech ledger and personal expense tracker built with pure HTML5, CSS3, and modular Vanilla JavaScript." />
+
+  <!-- Typography: Inter for UI & JetBrains Mono for Tabular Financial Figures -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Inline SVG Matte Grain Filter for Apple Titanium Texture -->
+  <svg class="bg-noise" aria-hidden="true" width="100%" height="100%">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+  </svg>
+
+  <div class="app-layout">
+    <!-- Sticky Frosted-Glass Navigation Bar -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand-group">
+          <div class="brand-badge" aria-hidden="true">₹</div>
+          <div class="brand-text">
+            <div class="brand-title-row">
+              <h1 class="brand-title">RupeeTrack</h1>
+              <span class="intern-tag">CODSOFT TASK 3</span>
+            </div>
+            <p class="brand-subtitle">Personal Cashflow Ledger &bull; Prince Gupta</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="action-btn" id="exportCsvBtn" title="Download ledger as CSV" aria-label="Export ledger data as CSV">
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 13v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+              <polyline points="7 10 10 13 13 10" />
+              <line x1="10" y1="13" x2="10" y2="3" />
+            </svg>
+            <span>Export CSV</span>
+          </button>
+
+          <button type="button" class="theme-toggle" id="themeToggleBtn" aria-label="Switch visual theme" title="Toggle Dark / Light Mode">
+            <svg class="theme-icon icon-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+            </svg>
+            <svg class="theme-icon icon-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="4" />
+              <path d="M10 2v2m0 12v2M2 10h2m12 0h2m-2.93-5.07l-1.41 1.41m-7.32 7.32l-1.41 1.41m0-10.14l1.41 1.41m7.32 7.32l1.41 1.41" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- 3-Column Financial Overview Cards -->
+      <section class="overview-section" aria-label="Financial Summary Cards">
+        <article class="stat-card balance-card" id="balanceCard">
+          <div class="card-header">
+            <span class="card-label">CURRENT BALANCE</span>
+            <span class="status-indicator" id="balanceStatusDot" aria-hidden="true"></span>
+          </div>
+          <div class="amount-wrap">
+            <span class="stat-amount tabular-nums" id="netBalance">&#8377;0.00</span>
+          </div>
+          <div class="card-meta">
+            <span class="pill-badge" id="savingsRateBadge">0.0% savings rate</span>
+            <span class="meta-subtext">Net cash retained</span>
+          </div>
+        </article>
+
+        <article class="stat-card income-card">
+          <div class="card-header">
+            <span class="card-label">TOTAL INFLOW</span>
+            <span class="type-pill income-pill">+ CREDIT</span>
+          </div>
+          <div class="amount-wrap">
+            <span class="stat-amount income-val tabular-nums" id="totalIncome">&#8377;0.00</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-count" id="incomeCount">0 transactions</span>
+            <span class="meta-subtext">Deposits &amp; Freelance</span>
+          </div>
+        </article>
+
+        <article class="stat-card expense-card">
+          <div class="card-header">
+            <span class="card-label">TOTAL OUTFLOW</span>
+            <span class="type-pill expense-pill">&minus; DEBIT</span>
+          </div>
+          <div class="amount-wrap">
+            <span class="stat-amount expense-val tabular-nums" id="totalExpense">&#8377;0.00</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-count" id="expenseCount">0 transactions</span>
+            <span class="meta-subtext">Living &amp; Academic spend</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Dual Column Workspace: Form & Allocation/Ledger -->
+      <div class="workspace-grid">
+        <!-- Left Column: Add / Edit Transaction Panel -->
+        <section class="panel form-panel" aria-labelledby="formHeading">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title" id="formHeading">Add Transaction</h2>
+              <p class="panel-subtitle" id="formSubtitle">Post a new cashflow entry to your ledger.</p>
+            </div>
+            <span class="edit-mode-tag hidden" id="editModeIndicator">EDITING</span>
+          </div>
+
+          <form id="transactionForm" novalidate>
+            <input type="hidden" id="editId" value="" />
+
+            <!-- Apple-Style Segmented Type Toggle -->
+            <div class="form-group">
+              <label class="field-label" id="typeGroupLabel">Transaction Type</label>
+              <div class="segmented-control" role="radiogroup" aria-labelledby="typeGroupLabel">
+                <input type="radio" name="txType" id="typeExpense" value="expense" checked />
+                <label for="typeExpense" class="segment-label">
+                  <span class="segment-bullet expense-bullet">&minus;</span> Expense
+                </label>
+
+                <input type="radio" name="txType" id="typeIncome" value="income" />
+                <label for="typeIncome" class="segment-label">
+                  <span class="segment-bullet income-bullet">+</span> Income
+                </label>
+
+                <div class="segmented-slider" aria-hidden="true"></div>
+              </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="form-group">
+              <div class="label-row">
+                <label for="txDesc" class="field-label">Description / Note</label>
+                <span class="field-hint">Min 2 characters</span>
+              </div>
+              <input
+                type="text"
+                id="txDesc"
+                class="form-input"
+                placeholder="e.g. Freelance UI milestone or Mess fee"
+                autocomplete="off"
+                required
+              />
+              <span class="field-error" id="descError" aria-live="polite"></span>
+            </div>
+
+            <!-- Amount & Category Fields -->
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <div class="label-row">
+                  <label for="txAmount" class="field-label">Amount</label>
+                  <span class="field-hint">INR (&#8377;)</span>
+                </div>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix" aria-hidden="true">&#8377;</span>
+                  <input
+                    type="number"
+                    id="txAmount"
+                    class="form-input has-prefix tabular-nums"
+                    placeholder="1500"
+                    min="0.01"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <span class="field-error" id="amountError" aria-live="polite"></span>
+              </div>
+
+              <div class="form-group flex-1">
+                <label for="txCategory" class="field-label">Category</label>
+                <div class="select-wrapper">
+                  <select id="txCategory" class="form-select" required>
+                    <option value="Food & Dining">Food &amp; Dining</option>
+                    <option value="College & Books">College &amp; Books</option>
+                    <option value="Hostel & Rent">Hostel &amp; Rent</option>
+                    <option value="Travel & Transit">Travel &amp; Transit</option>
+                    <option value="Stipend / Freelance">Stipend / Freelance</option>
+                    <option value="Shopping & Tech">Shopping &amp; Tech</option>
+                  </select>
+                  <svg class="select-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <polyline points="6 8 10 12 14 8" />
+                  </svg>
+                </div>
+                <span class="field-error" id="categoryError" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <!-- Date Field -->
+            <div class="form-group">
+              <label for="txDate" class="field-label">Date</label>
+              <input type="date" id="txDate" class="form-input date-input" required />
+              <span class="field-error" id="dateError" aria-live="polite"></span>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span id="submitBtnText">Record Entry</span>
+              </button>
+              <button type="button" class="btn btn-ghost hidden" id="cancelEditBtn">
+                Cancel
+              </button>
+            </div>
+            <p class="edit-esc-hint hidden" id="escHint">Tip: Press <kbd>Esc</kbd> to discard changes</p>
+          </form>
+        </section>
+
+        <!-- Right Column: Expense Allocation Bars & Transaction History -->
+        <div class="right-stack">
+          <!-- Spend Allocation Breakdown Panel -->
+          <section class="panel allocation-panel" aria-labelledby="allocHeading">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title" id="allocHeading">Expense Allocation</h2>
+                <p class="panel-subtitle">Proportional spend distribution across active expense categories.</p>
+              </div>
+              <span class="alloc-total tabular-nums" id="allocTotalExpense">&#8377;0.00</span>
+            </div>
+
+            <div class="allocation-bars" id="allocationBarsContainer">
+              <!-- Rendered via script.js -->
+            </div>
+          </section>
+
+          <!-- Transaction History Ledger Panel -->
+          <section class="panel ledger-panel" aria-labelledby="ledgerHeading">
+            <div class="ledger-header">
+              <div>
+                <h2 class="panel-title" id="ledgerHeading">Transaction Ledger</h2>
+                <p class="panel-subtitle" id="ledgerSubtitle">Showing all recorded cashflow events.</p>
+              </div>
+              <span class="record-counter tabular-nums" id="recordCounter">0 records</span>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <div class="ledger-toolbar">
+              <!-- Type Filter Segmented Control -->
+              <div class="type-filter-group" role="group" aria-label="Filter transactions by type">
+                <button type="button" class="filter-tab active" data-type-filter="all">All</button>
+                <button type="button" class="filter-tab" data-type-filter="expense">Expenses</button>
+                <button type="button" class="filter-tab" data-type-filter="income">Income</button>
+              </div>
+
+              <div class="filter-controls-row">
+                <!-- Category Filter Dropdown -->
+                <div class="select-wrapper category-filter-wrap">
+                  <select id="categoryFilter" class="form-select filter-select" aria-label="Filter by category">
+                    <option value="all">All Categories</option>
+                    <option value="Food & Dining">Food &amp; Dining</option>
+                    <option value="College & Books">College &amp; Books</option>
+                    <option value="Hostel & Rent">Hostel &amp; Rent</option>
+                    <option value="Travel & Transit">Travel &amp; Transit</option>
+                    <option value="Stipend / Freelance">Stipend / Freelance</option>
+                    <option value="Shopping & Tech">Shopping &amp; Tech</option>
+                  </select>
+                  <svg class="select-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <polyline points="6 8 10 12 14 8" />
+                  </svg>
+                </div>
+
+                <!-- Search Input -->
+                <div class="search-input-wrap">
+                  <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <circle cx="9" cy="9" r="6" />
+                    <line x1="13.5" y1="13.5" x2="18" y2="18" />
+                  </svg>
+                  <input
+                    type="search"
+                    id="searchQuery"
+                    class="search-input"
+                    placeholder="Search transactions..."
+                    aria-label="Search ledger transactions by description"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="search-clear-btn hidden" id="searchClearBtn" aria-label="Clear search query">&times;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ledger Transaction List -->
+            <div class="ledger-list" id="transactionList" role="feed" aria-label="Transaction entries">
+              <!-- Rendered via script.js -->
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <p class="footer-note">RupeeTrack &bull; Built with standard HTML5, CSS3, &amp; Vanilla JavaScript</p>
+        <p class="footer-meta">Tabular Precision Ledger &bull; CodSoft Frontend Development Task 3</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 5-Second Undo Toast Notification -->
+  <aside class="undo-toast hidden" id="undoToast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="undo-content">
+      <div class="undo-text-group">
+        <span class="undo-status-dot" aria-hidden="true"></span>
+        <span class="undo-label" id="undoLabel">Transaction deleted</span>
+      </div>
+      <button type="button" class="undo-btn" id="undoActionBtn">
+        <span>Undo</span>
+        <span class="undo-timer tabular-nums" id="undoTimerText">(5s)</span>
+      </button>
+      <button type="button" class="undo-dismiss-btn" id="undoDismissBtn" aria-label="Dismiss undo notification">&times;</button>
+    </div>
+    <div class="undo-progress-track">
+      <div class="undo-progress-bar" id="undoProgressBar"></div>
+    </div>
+  </aside>
+
+  <script src="script.js"></script>
+</body>
+</html>
